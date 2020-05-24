@@ -17,9 +17,11 @@ pub const ALL_MODULES: &[&str] = &[
     "cmd_duration",
     "conda",
     "directory",
+    "docker_context",
     "dotnet",
     "elixir",
     "elm",
+    "erlang",
     "env_var",
     "git_branch",
     "git_commit",
@@ -31,12 +33,15 @@ pub const ALL_MODULES: &[&str] = &[
     "hostname",
     "java",
     "jobs",
+    "julia",
     "kubernetes",
     "line_break",
     "memory_usage",
     "nix_shell",
     "nodejs",
+    "ocaml",
     "package",
+    "purescript",
     "python",
     "ruby",
     "crystal",
@@ -46,6 +51,7 @@ pub const ALL_MODULES: &[&str] = &[
     "singularity",
     "time",
     "username",
+    "zig",
 ];
 
 /// A module is a collection of segments showing data for a single integration
@@ -95,6 +101,11 @@ impl<'a> Module<'a> {
         self.segments.push(segment);
 
         self.segments.last_mut().unwrap()
+    }
+
+    /// Set segments in module
+    pub fn set_segments(&mut self, segments: Vec<Segment>) {
+        self.segments = segments;
     }
 
     /// Get module's name

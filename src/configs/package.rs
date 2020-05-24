@@ -8,6 +8,7 @@ pub struct PackageConfig<'a> {
     pub prefix: &'a str,
     pub symbol: SegmentConfig<'a>,
     pub style: Style,
+    pub display_private: bool,
     pub disabled: bool,
 }
 
@@ -17,6 +18,7 @@ impl<'a> RootModuleConfig<'a> for PackageConfig<'a> {
             prefix: "is ",
             symbol: SegmentConfig::new("📦 "),
             style: Color::Fixed(208).bold(),
+            display_private: false,
             disabled: false,
         }
     }

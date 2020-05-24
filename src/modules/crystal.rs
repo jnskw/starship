@@ -51,15 +51,15 @@ mod tests {
     use ansi_term::Color;
     use std::fs::File;
     use std::io;
-    use tempfile;
 
     #[test]
     fn folder_without_crystal_files() -> io::Result<()> {
         let dir = tempfile::tempdir()?;
-        let actual = render_module("crystal", dir.path());
+        let actual = render_module("crystal", dir.path(), None);
         let expected = None;
         assert_eq!(expected, actual);
-        Ok(())
+
+        dir.close()
     }
 
     #[test]
@@ -67,10 +67,11 @@ mod tests {
         let dir = tempfile::tempdir()?;
         File::create(dir.path().join("shard.yml"))?.sync_all()?;
 
-        let actual = render_module("crystal", dir.path());
+        let actual = render_module("crystal", dir.path(), None);
         let expected = Some(format!("via {} ", Color::Red.bold().paint("🔮 v0.32.1")));
         assert_eq!(expected, actual);
-        Ok(())
+
+        dir.close()
     }
 
     #[test]
@@ -78,9 +79,10 @@ mod tests {
         let dir = tempfile::tempdir()?;
         File::create(dir.path().join("main.cr"))?.sync_all()?;
 
-        let actual = render_module("crystal", dir.path());
+        let actual = render_module("crystal", dir.path(), None);
         let expected = Some(format!("via {} ", Color::Red.bold().paint("🔮 v0.32.1")));
         assert_eq!(expected, actual);
-        Ok(())
+
+        dir.close()
     }
 }

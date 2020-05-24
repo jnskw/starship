@@ -32,6 +32,11 @@ disabled = true
 export STARSHIP_CONFIG=~/.starship
 ```
 
+Equivalently in PowerShell (Windows) would be adding this line to your `$PROFILE`:
+```ps1
+$ENV:STARSHIP_CONFIG = "$HOME\.starship"
+```
+
 ### 术语
 
 **组件（Module）**：提示符的组成部分，通过来自系统的上下文信息向用户显示各种信息。 比如“nodejs”组件会在当前目录是一个 NodeJS 项目时显示您当前安装的 NodeJS 版本。
@@ -98,18 +103,25 @@ prompt_order = [
     "git_state",
     "git_status",
     "hg_branch",
+    "docker_context",
     "package",
     "dotnet",
+    "elixir",
     "elm",
+    "erlang",
     "golang",
     "haskell",
     "java",
+    "julia",
     "nodejs",
+    "ocaml",
     "php",
+    "purescript",
     "python",
     "ruby",
     "rust",
     "terraform",
+    "zig",
     "nix_shell",
     "conda",
     "memory_usage",
@@ -117,6 +129,7 @@ prompt_order = [
     "env_var",
     "crystal",
     "cmd_duration",
+    "custom",
     "line_break",
     "jobs",
     "battery",
@@ -128,6 +141,8 @@ prompt_order = [
 ## AWS
 
 `aws` 组件显示当前 AWS 主机所在区域与配置信息。 各组件基于 `AWS_REGION`，`AWS_DEFAULT_REGION` 和 `AWS_PROFILE` 环境变量与 `~/.aws/config` 文件。
+
+When using [aws-vault](https://github.com/99designs/aws-vault) the profile is read from the `AWS_VAULT` env var.
 
 ### 配置项
 
@@ -192,7 +207,7 @@ discharging_symbol = "💀"
 
 ### Battery 组件的显示
 
-`display` 选项用于定义电池指示器的显示阈值（threshold）和显示效果（style）。 如果 `display` 没有设置， 默认配置如下所示：
+`display` 选项用于定义电池指示器的显示阈值（threshold）和显示效果（style）。 如果 `display` 没有设置， 默认设置如下：
 
 ```toml
 [[battery.display]]
@@ -313,6 +328,31 @@ prefix = "underwent "
 style = "dimmed green"
 ```
 
+## Crystal
+
+The `crystal` module shows the currently installed version of Crystal. 此组件将在符合以下任意条件之一时显示：
+
+- 当前目录包含一个 `shard.yml` 文件
+- The current directory contains a `.cr` file
+
+### 配置项
+
+| 字段         | 默认值          | 描述                                                        |
+| ---------- | ------------ | --------------------------------------------------------- |
+| `symbol`   | `"🔮 "`       | The symbol used before displaying the version of crystal. |
+| `style`    | `"bold red"` | 此组件的样式。                                                   |
+| `disabled` | `false`      | Disables the `crystal` module.                            |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[crystal]
+symbol = "✨ "
+style = "bold blue"
+```
+
 ## Directory
 
 `directory` 组件显示当前目录的路径，显示的路径会截断到三个父目录以内。 如果您处于一个 git 仓库中，显示的路径则最多会截断到该仓库的根目录。
@@ -339,6 +379,8 @@ style = "dimmed green"
 | `fish_style_pwd_dir_length` | `0`    | 使用 fish shell 当前目录路径逻辑时每个省略目录名使用的字符数。 |
 | `use_logical_path`          | `true` | 显示由 shell 提供的逻辑路径（`PWD`）而不是 OS 提供的路径。 |
 
+`fish_style_pwd_dir_length` interacts with the standard truncation options in a way that can be surprising at first: if it's non-zero, the components of the path that would normally be truncated are instead displayed with that many characters. For example, the path `/built/this/city/on/rock/and/roll`, which would normally be displayed as as `rock/and/roll`, would be displayed as `/b/t/c/o/rock/and/roll` with `fish_style_pwd_dir_length = 1`--the path components that would normally be removed are displayed with a single character. For `fish_style_pwd_dir_length = 2`, it would be `/bu/th/ci/on/rock/and/roll`.
+
 </details>
 
 ### 示例
@@ -348,6 +390,28 @@ style = "dimmed green"
 
 [directory]
 truncation_length = 8
+```
+
+## Docker Context
+
+The `docker_context` module shows the currently active [Docker context](https://docs.docker.com/engine/context/working-with-contexts/) if it's not set to `default`.
+
+### 配置项
+
+| 字段                | 默认值           | 描述                                                                                      |
+| ----------------- | ------------- | --------------------------------------------------------------------------------------- |
+| `symbol`          | `"🐳 "`        | The symbol used before displaying the Docker context .                                  |
+| `only_with_files` | `false`       | Only show when there's a `docker-compose.yml` or `Dockerfile` in the current directory. |
+| `style`           | `"bold blue"` | 此组件的样式。                                                                                 |
+| `disabled`        | `true`        | Disables the `docker_context` module.                                                   |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[docker_context]
+symbol = "🐋 "
 ```
 
 ## Dotnet
@@ -378,12 +442,36 @@ style = "green"
 heuristic = false
 ```
 
+## Elixir
+
+The `elixir` module shows the currently installed version of Elixir and Erlang/OTP. 此组件将在符合以下任意条件时显示：
+
+- 当前目录包含一个 `mix.exs` 文件.
+
+### 配置项
+
+| 字段         | 默认值             | 描述                                                              |
+| ---------- | --------------- | --------------------------------------------------------------- |
+| `symbol`   | `"💧 "`          | The symbol used before displaying the version of Elixir/Erlang. |
+| `style`    | `"bold purple"` | 此组件的样式。                                                         |
+| `disabled` | `false`         | Disables the `elixir` module.                                   |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[elixir]
+symbol = "🔮 "
+```
+
 ## Elm
 
-The `elm` module shows the currently installed version of Elm. 此组件只有满足以下条件之一时才会被显示：
+The `elm` module shows the currently installed version of Elm. 此组件将在符合以下任意条件之一时显示：
 
-- 当前目录包含 `elm.json` 文件
+- 当前目录包含一个 `elm.json` 文件
 - 当前目录包含 `elm-package.json` 文件
+- The current directory contains a `.elm-version` file
 - The current directory contains a `elm-stuff` folder
 - The current directory contains a `*.elm` files
 
@@ -414,15 +502,15 @@ symbol = " "
 
 ### 配置项
 
-| 字段         | 默认值              | 描述                  |
-| ---------- | ---------------- | ------------------- |
-| `symbol`   |                  | 这个字段的内容会显示在环境变量值之前。 |
-| `variable` |                  | 要显示的环境变量。           |
-| `default`  |                  | 所选变量未定义时显示的默认值。     |
-| `prefix`   | `""`             | 直接在显示环境变量值前显示的前缀。   |
-| `suffix`   | `""`             | 直接在显示环境变量值后显示的后缀。   |
-| `style`    | `"dimmed black"` | 此组件的样式。             |
-| `disabled` | `false`          | 禁用 `env_var` 组件。    |
+| 字段         | 默认值                   | 描述                  |
+| ---------- | --------------------- | ------------------- |
+| `symbol`   |                       | 这个字段的内容会显示在环境变量值之前。 |
+| `variable` |                       | 要显示的环境变量。           |
+| `default`  |                       | 所选变量未定义时显示的默认值。     |
+| `prefix`   | `""`                  | 直接在显示环境变量值前显示的前缀。   |
+| `suffix`   | `""`                  | 直接在显示环境变量值后显示的后缀。   |
+| `style`    | `"dimmed bold black"` | 此组件的样式。             |
+| `disabled` | `false`               | 禁用 `env_var` 组件。    |
 
 ### 示例
 
@@ -432,6 +520,30 @@ symbol = " "
 [env_var]
 variable = "SHELL"
 default = "unknown shell"
+```
+
+## Erlang
+
+The `erlang` module shows the currently installed version of Erlang/OTP. 此组件将在符合以下任意条件之一时显示：
+
+- 当前目录包含一个 `rebar.config` 文件.
+- 当前目录包含一个 `erlang.mk` 文件.
+
+### 配置项
+
+| 字段         | 默认值        | 描述                                                       |
+| ---------- | ---------- | -------------------------------------------------------- |
+| `symbol`   | `"🖧 "`     | The symbol used before displaying the version of Erlang. |
+| `style`    | `bold red` | The style for this module.                               |
+| `disabled` | `false`    | Disables the `erlang` module.                            |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[erlang]
+symbol = "e "
 ```
 
 ## Git Branch
@@ -463,21 +575,16 @@ truncation_symbol = ""
 
 `git_commit` 组件显示当前目录的 git 仓库的当前提交的哈希值。
 
-::: tip
-
-此组件默认被禁用。 若要启用此组件，请在配置文件中设置 `disable` 字段为 `false`。
-
-:::
-
 ### 配置项
 
-| 字段                   | 默认值            | 描述                   |
-| -------------------- | -------------- | -------------------- |
-| `commit_hash_length` | `7`            | 显示的 git 提交哈希值的长度。    |
-| `prefix`             | `"("`          | 直接在 git 提交哈希值前显示的前缀。 |
-| `suffix`             | `")"`          | 直接在 git 提交哈希值后显示的后缀。 |
-| `style`              | `"bold green"` | 此组件的样式。              |
-| `disabled`           | `true`         | 禁用 `git_commit` 组件。  |
+| 字段                   | 默认值            | 描述                                                    |
+| -------------------- | -------------- | ----------------------------------------------------- |
+| `commit_hash_length` | `7`            | 显示的 git 提交哈希值的长度。                                     |
+| `prefix`             | `"("`          | 直接在 git 提交哈希值前显示的前缀。                                  |
+| `suffix`             | `")"`          | 直接在 git 提交哈希值后显示的后缀。                                  |
+| `style`              | `"bold green"` | 此组件的样式。                                               |
+| `only_detached`      | `true`         | Only show git commit hash when in detached HEAD state |
+| `disabled`           | `false`        | 禁用 `git_commit` 组件。                                   |
 
 ### 示例
 
@@ -485,7 +592,6 @@ truncation_symbol = ""
 # ~/.config/starship.toml
 
 [git_commit]
-disabled = false
 commit_hash_length = 4
 ```
 
@@ -579,13 +685,14 @@ deleted = "🗑"
 
 ## Golang
 
-`golang` 组件显示当前安装的 Golang 版本。 此组件只有满足以下条件之一时才会被显示：
+`golang` 组件显示当前安装的 Golang 版本。 此组件将在符合以下任意条件之一时显示：
 
 - 当前目录包含 `go.mod` 文件
 - 当前目录包含 `go.sum` 文件
 - 当前目录包含 `glide.yaml` 文件
 - 当前目录包含 `Gopkg.yml` 文件
 - 当前目录包含 `Gopkg.lock` 文件
+- The current directory contains a `.go-version` file
 - 当前目录包含 `Godeps` 目录
 - 当前目录包含一个使用 `.go` 扩展名的文件
 
@@ -607,7 +714,7 @@ symbol = "🏎💨 "
 ```
 ## Haskell
 
-`haskell` 组件显示当前安装的 Haskell Stack 版本。 此组件只有满足以下条件之一时才会被显示：
+`haskell` 组件显示当前安装的 Haskell Stack 版本。 此组件将在符合以下任意条件之一时显示：
 
 - 当前目录包含 `stack.yaml` 文件
 
@@ -627,31 +734,6 @@ symbol = "🏎💨 "
 
 [haskell]
 symbol = " "
-```
-
-## Mercurial Branch
-
-`hg_branch` 组件显示当前目录的 hg 仓库的活动分支。
-
-### 配置项
-
-| 字段                  | 默认值             | 描述                              |
-| ------------------- | --------------- | ------------------------------- |
-| `symbol`            | `" "`          | 该字段的内容显示于当前仓库的 hg 书签或活动分支名之前。   |
-| `truncation_length` | `2^63 - 1`      | 将显示的 hg 分支名截断到该数量的字素（graphemes） |
-| `truncation_symbol` | `"…"`           | 此字段的内容用来表示分支名称被截断。              |
-| `style`             | `"bold purple"` | 此组件的样式。                         |
-| `disabled`          | `true`          | 禁用 `hg_branch` 组件。              |
-
-### 示例
-
-```toml
-# ~/.config/starship.toml
-
-[hg_branch]
-symbol = "🌱 "
-truncation_length = 4
-truncation_symbol = ""
 ```
 
 ## Hostname
@@ -682,6 +764,30 @@ trim_at = ".companyname.com"
 disabled = false
 ```
 
+## Java
+
+`java` 组件显示当前安装的 Java 版本。 此组件将在符合以下任意条件之一时显示：
+
+- The current directory contains a `pom.xml`, `build.gradle.kts`, `build.sbt` or `.java-version` file
+- 当前目录包含一个扩展名为 `.java`，`.class`，`.gradle` 或 `.jar` 的文件
+
+### 配置项
+
+| 字段         | 默认值            | 描述                       |
+| ---------- | -------------- | ------------------------ |
+| `symbol`   | `"☕ "`         | 这个字段的内容会显示在当前 Java 版本之前。 |
+| `style`    | `"dimmed red"` | 此组件的样式。                  |
+| `disabled` | `false`        | 禁用 `java` 组件。            |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[java]
+symbol = "🌟 "
+```
+
 ## Jobs
 
 `jobs` 组件显示当前正在运行的任务数量。 仅当有后台任务运行时，此组件才会显示。 如果有超过 1 个作业，模块将显示正在运行的作业数量，如果配置了 `threshold` 字段，则使用它作为显示作业数量的下限。
@@ -705,6 +811,30 @@ symbol = "+ "
 threshold = 4
 ```
 
+## Julia
+
+The `julia` module shows the currently installed version of Julia. 此组件将在符合以下任意条件之一时显示：
+
+- The current directory contains a `Project.toml` file
+- The current directory contains a `Manifest.toml` file
+- The current directory contains a file with the `.jl` extension
+
+### 配置项
+
+| 字段         | 默认值             | 描述                                                      |
+| ---------- | --------------- | ------------------------------------------------------- |
+| `symbol`   | `"ஃ "`          | The symbol used before displaying the version of Julia. |
+| `style`    | `"bold purple"` | 此组件的样式。                                                 |
+| `disabled` | `false`         | Disables the `julia` module.                            |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[julia]
+symbol = "∴ "
+```
 ## Kubernetes
 
 显示当前的 Kubernetes 上下文名以及，如果有相关设置，则显示来自 kubeconig 文件的命名空间。 命名空间需要在 kubeconfig 文件中设置，这可以通过 `kubectl config set-context starship-cluster --namespace astronaut` 完成。 如果设置了环境变量 `$KUBECONFIG`，此组件将使用该值，否则会使用 `~/.kube/config`。
@@ -717,11 +847,12 @@ threshold = 4
 
 ### 配置项
 
-| 字段         | 默认值           | 描述                   |
-| ---------- | ------------- | -------------------- |
-| `symbol`   | `"☸ "`        | 这个字段的内容会显示在当前集群信息之前。 |
-| `style`    | `"bold blue"` | 此组件的样式。              |
-| `disabled` | `true`        | 禁用 `kubernetes` 组件。  |
+| 字段                | 默认值           | 描述                                  |
+| ----------------- | ------------- | ----------------------------------- |
+| `symbol`          | `"☸ "`        | 这个字段的内容会显示在当前集群信息之前。                |
+| `context_aliases` |               | Table of context aliases to display |
+| `style`           | `"bold blue"` | 此组件的样式。                             |
+| `disabled`        | `true`        | 禁用 `kubernetes` 组件。                 |
 
 ### 示例
 
@@ -730,8 +861,10 @@ threshold = 4
 
 [kubernetes]
 symbol = "⛵ "
-style = "dim green"
+style = "dimmed green"
 disabled = false
+[kubernetes.context_aliases]
+"dev.local.cluster.k8s" = "dev"
 ```
 
 ## Line Break
@@ -751,56 +884,6 @@ disabled = false
 
 [line_break]
 disabled = true
-```
-
-## Nix-shell
-
-`nix_shell` 组件显示 nix-shell 环境。 当处于一个 nix-shell 环境中时，此组件会被显示。
-
-### 配置项
-
-| 字段           | 默认值          | 描述                 |
-| ------------ | ------------ | ------------------ |
-| `use_name`   | `false`      | 显示 nix-shell 的名称。  |
-| `impure_msg` | `"impure"`   | 自定义“impure”消息。     |
-| `pure_msg`   | `"pure"`     | 自定义“pure”消息。       |
-| `style`      | `"bold red"` | 此组件的样式。            |
-| `disabled`   | `false`      | 禁用 `nix_shell` 组件。 |
-
-### 示例
-
-```toml
-# ~/.config/starship.toml
-
-[nix_shell]
-disabled = true
-use_name = true
-impure_msg = "impure shell"
-pure_msg = "pure shell"
-```
-
-## Java
-
-`java` 组件显示当前安装的 Java 版本。 此组件只有满足以下条件之一时才会被显示：
-
-- 当前目录包含 `pom.xml`，`build.gradle.kts` 或 `build.sbt` 文件
-- 当前目录包含一个扩展名为 `.java`，`.class`，`.gradle` 或 `.jar` 的文件
-
-### 配置项
-
-| 字段         | 默认值            | 描述                       |
-| ---------- | -------------- | ------------------------ |
-| `symbol`   | `"☕ "`         | 这个字段的内容会显示在当前 Java 版本之前。 |
-| `style`    | `"dimmed red"` | 此组件的样式。                  |
-| `disabled` | `false`        | 禁用 `java` 组件。            |
-
-### 示例
-
-```toml
-# ~/.config/starship.toml
-
-[java]
-symbol = "🌟 "
 ```
 
 ## Memory Usage
@@ -833,6 +916,7 @@ symbol = "🌟 "
 # ~/.config/starship.toml
 
 [memory_usage]
+disabled = false
 show_percentage = true
 show_swap = true
 threshold = -1
@@ -841,29 +925,57 @@ separator = "/"
 style = "bold dimmed green"
 ```
 
-## Crystal
+## Mercurial Branch
 
-The `crystal` module shows the currently installed version of Crystal. 此组件只有满足以下条件之一时才会被显示：
-
-- 当前目录包含 `shard.yml` 文件
-- The current directory contains a `.cr` file
+`hg_branch` 组件显示当前目录的 hg 仓库的活动分支。
 
 ### 配置项
 
-| 字段         | 默认值          | 描述                                                        |
-| ---------- | ------------ | --------------------------------------------------------- |
-| `symbol`   | `"🔮 "`       | The symbol used before displaying the version of crystal. |
-| `style`    | `"bold red"` | 此组件的样式。                                                   |
-| `disabled` | `false`      | Disables the `crystal` module.                            |
+| 字段                  | 默认值             | 描述                              |
+| ------------------- | --------------- | ------------------------------- |
+| `symbol`            | `" "`          | 该字段的内容显示于当前仓库的 hg 书签或活动分支名之前。   |
+| `truncation_length` | `2^63 - 1`      | 将显示的 hg 分支名截断到该数量的字素（graphemes） |
+| `truncation_symbol` | `"…"`           | 此字段的内容用来表示分支名称被截断。              |
+| `style`             | `"bold purple"` | 此组件的样式。                         |
+| `disabled`          | `true`          | 禁用 `hg_branch` 组件。              |
 
 ### 示例
 
 ```toml
 # ~/.config/starship.toml
 
-[crystal]
-symbol = "✨ "
-style = "bold blue"
+[hg_branch]
+symbol = "🌱 "
+truncation_length = 4
+truncation_symbol = ""
+```
+
+## Nix-shell
+
+`nix_shell` 组件显示 nix-shell 环境。 当处于一个 nix-shell 环境中时，此组件会被显示。
+
+### 配置项
+
+| 字段           | 默认值           | 描述                                                |
+| ------------ | ------------- | ------------------------------------------------- |
+| `use_name`   | `false`       | 显示 nix-shell 的名称。                                 |
+| `impure_msg` | `"impure"`    | 自定义“impure”消息。                                    |
+| `pure_msg`   | `"pure"`      | 自定义“pure”消息。                                      |
+| `symbol`     | `"❄️  "`      | The symbol used before displaying the shell name. |
+| `style`      | `"bold blue"` | 此组件的样式。                                           |
+| `disabled`   | `false`       | 禁用 `nix_shell` 组件。                                |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[nix_shell]
+disabled = true
+use_name = true
+impure_msg = "impure shell"
+pure_msg = "pure shell"
+symbol = "☃️  "
 ```
 
 ## NodeJS
@@ -871,6 +983,7 @@ style = "bold blue"
 `nodejs` 组件显示当前安装的 NodeJS 版本。 此组件将在符合以下任意条件之一时显示：
 
 - 当前目录包含 `package.json` 文件
+- The current directory contains a `.node-version` file
 - 当前目录包含 `node_modules` 目录
 - 当前目录包含一个使用 `.js` 扩展名的文件
 
@@ -893,22 +1006,26 @@ symbol = "🤖 "
 
 ## Package Version
 
-当前目录是软件包的代码仓库时，将显示 `package` 组件，并显示软件包当前版本。 此组件目前支持`npm`，`cargo` 和 `poetry` 软件包。
+当前目录是软件包的代码仓库时，将显示 `package` 组件，并显示软件包当前版本。 The module currently supports `npm`, `cargo`, `poetry`, `composer`, `gradle`, `julia` and `mix` packages.
 
 - **npm** —— `npm` 软件包版本从当前目录下的 `package.json` 中得到
 - **cargo** —— `cargo` 软件包的版本从当前目录下的 `Cargo.toml` 中得到
 - **poetry** —— `poetry` 软件包版本从当前目录下的 `pyproject.toml` 中得到
 - **composer** —— `composer` 软件包版本从当前目录下的 `composer.json` 中得到
+- **gradle** – The `gradle` package version is extracted from the `build.gradle` present
+- **julia** - The package version is extracted from the `Project.toml` present
+- **mix** - The `mix` package version is extracted from the `mix.exs` present
 
 > ⚠ 此组件显示的是源代码在当前目录中的软件包的版本，而不是包管理器的版本。
 
 ### 配置项
 
-| 字段         | 默认值          | 描述                    |
-| ---------- | ------------ | --------------------- |
-| `symbol`   | `"📦 "`       | 这个字段的内容会显示在当前软件包版本之前。 |
-| `style`    | `"bold red"` | 此组件的样式。               |
-| `disabled` | `false`      | 禁用 `package` 组件。      |
+| 字段                | 默认值          | 描述                                                        |
+| ----------------- | ------------ | --------------------------------------------------------- |
+| `symbol`          | `"📦 "`       | 这个字段的内容会显示在当前软件包版本之前。                                     |
+| `style`           | `"bold 208"` | 此组件的样式。                                                   |
+| `display_private` | `false`      | Enable displaying version for packages marked as private. |
+| `disabled`        | `false`      | 禁用 `package` 组件。                                          |
 
 ### 示例
 
@@ -919,11 +1036,40 @@ symbol = "🤖 "
 symbol = "🎁 "
 ```
 
+## OCaml
+
+The `ocaml` module shows the currently installed version of OCaml. 此组件将在符合以下任意条件之一时显示：
+
+- The current directory contains a file with `.opam` extension or `_opam` directory
+- The current directory contains a `esy.lock` directory
+- The current directory contains a `dune` or `dune-project` file
+- The current directory contains a `jbuild` or `jbuild-ignore` file
+- The current directory contains a `.merlin` file
+- The current directory contains a file with `.ml`, `.mli`, `.re` or `.rei` extension
+
+### 配置项
+
+| 字段         | 默认值             | 描述                                                      |
+| ---------- | --------------- | ------------------------------------------------------- |
+| `symbol`   | `"🐫 "`          | The symbol used before displaying the version of OCaml. |
+| `style`    | `"bold yellow"` | 此组件的样式。                                                 |
+| `disabled` | `false`         | Disables the `ocaml` module.                            |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[ocaml]
+symbol = "🐪 "
+```
+
 ## PHP
 
-`php` 组件显示当前安装的 PHP 版本。 此组件只有满足以下条件之一时才会被显示：
+`php` 组件显示当前安装的 PHP 版本。 此组件将在符合以下任意条件时显示：
 
 - 当前目录包含一个 `composer.json` 文件
+- The current directory contains a `.php-version` file
 - 当前目录包含一个 `.php` 文件
 
 ### 配置项
@@ -931,7 +1077,7 @@ symbol = "🎁 "
 | 字段         | 默认值          | 描述                      |
 | ---------- | ------------ | ----------------------- |
 | `symbol`   | `"🐘 "`       | 这个字段的内容会显示在当前 PHP 版本之前。 |
-| `style`    | `"bold red"` | 此组件的样式。                 |
+| `style`    | `"bold 147"` | 此组件的样式。                 |
 | `disabled` | `false`      | 禁用 `php` 组件。            |
 
 ### 示例
@@ -945,31 +1091,32 @@ symbol = "🔹 "
 
 ## Python
 
-`python` 组件显示当前安装的 Python 版本。
+The `python` module shows the currently installed version of Python and the current Python virtual environment if one is activated.
 
-如果 `pyenv_version_name` 设置为 `true`，则将显示 pyenv 版本名称。
+If `pyenv_version_name` is set to `true`, it will display the pyenv version name. Otherwise, it will display the version number from `python --version`.
 
-否则，它将显示来自 `python --version` 的版本号，并显示当前的 Python 虚拟环境，如果激活了的话。
-
-此组件只有满足以下条件之一时才会被显示：
+此组件将在符合以下任意条件之一时显示：
 
 - 当前目录包含 `.python-version` 文件
 - 当前目录包含 `requirements.txt` 文件
 - 当前目录包含 `pyproject.toml` 文件
-- 当前目录包含一个使用 `.py` 扩展名的文件
+- The current directory contains a file with the `.py` extension (and `scan_for_pyfiles` is true)
 - 当前目录包含 `Pipfile` 文件
 - 当前目录包含一个 `tox.ini` 文件
+- 当前目录包含一个 `setup.py` 文件
+- The current directory contains a `__init__.py` file
 - 当前处于一个活跃的 python 虚拟环境中
 
 ### 配置项
 
-| 字段                   | 默认值             | 描述                                        |
-| -------------------- | --------------- | ----------------------------------------- |
-| `symbol`             | `"🐍 "`          | 这个字段的内容会显示在当前 Python 版本之前。                |
-| `pyenv_version_name` | `false`         | 使用 pyenv 获取 Python 版本                     |
-| `pyenv_prefix`       | `"pyenv "`      | 在 pyenv 版本前显示的前缀（默认显示 `pyenv MY_VERSION`） |
-| `style`              | `"bold yellow"` | 此组件的样式。                                   |
-| `disabled`           | `false`         | 禁用 `python` 组件。                           |
+| 字段                   | 默认值             | 描述                                                                         |
+| -------------------- | --------------- | -------------------------------------------------------------------------- |
+| `symbol`             | `"🐍 "`          | 这个字段的内容会显示在当前 Python 版本之前。                                                 |
+| `pyenv_version_name` | `false`         | 使用 pyenv 获取 Python 版本                                                      |
+| `pyenv_prefix`       | `"pyenv "`      | 在 pyenv 版本前显示的前缀（默认显示 `pyenv MY_VERSION`）                                  |
+| `scan_for_pyfiles`   | `true`          | If false, Python files in the current directory will not show this module. |
+| `style`              | `"bold yellow"` | 此组件的样式。                                                                    |
+| `disabled`           | `false`         | 禁用 `python` 组件。                                                            |
 
 ### 示例
 
@@ -984,9 +1131,10 @@ pyenv_prefix = "foo "
 
 ## Ruby
 
-`ruby` 组件显示当前安装的 Ruby 版本。 此组件只有满足以下条件之一时才会被显示：
+`ruby` 组件显示当前安装的 Ruby 版本。 此组件将在符合以下任意条件之一时显示：
 
 - 当前目录包含 `Gemfile` 文件
+- The current directory contains a `.ruby-version` file
 - 当前目录包含 `.rb` 文件
 
 ### 配置项
@@ -1008,7 +1156,7 @@ symbol = "🔺 "
 
 ## Rust
 
-`rust` 组件显示当前安装的 Rust 版本。 此组件只有满足以下条件之一时才会被显示：
+`rust` 组件显示当前安装的 Rust 版本。 此组件将在符合以下任意条件之一时显示：
 
 - 当前目录包含 `Cargo.toml` 文件
 - 当前目录包含一个使用 `.rs` 扩展名的文件
@@ -1030,9 +1178,33 @@ symbol = "🔺 "
 symbol = "⚙️ "
 ```
 
+## Singularity
+
+The `singularity` module shows the current singularity image, if inside a container and `$SINGULARITY_NAME` is set.
+
+### 配置项
+
+| 字段         | 默认值                  | 描述                                               |
+| ---------- | -------------------- | ------------------------------------------------ |
+| `label`    | `""`                 | Prefix before the image name display.            |
+| `prefix`   | `"["`                | Prefix to display immediately before image name. |
+| `suffix`   | `"]"`                | Suffix to display immediately after image name.  |
+| `symbol`   | `""`                 | The symbol used before the image name.           |
+| `style`    | `"bold dimmed blue"` | 此组件的样式。                                          |
+| `disabled` | `false`              | Disables the `singularity` module.               |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[singularity]
+symbol = "📦 "
+```
+
 ## Terraform
 
-`terraform` 组件显示当前选定的 terraform 工作区和版本。 默认情况下不会显示 terraform 版本，因为当使用大量插件时，当前版本 terraform 查询版本号很慢。 此组件只有满足以下条件之一时才会被显示：
+`terraform` 组件显示当前选定的 terraform 工作区和版本。 默认情况下不会显示 terraform 版本，因为当使用大量插件时，当前版本 terraform 查询版本号很慢。 此组件将在符合以下任意条件之一时显示：
 
 - 当前目录包含 `.terraform` 目录
 - 当前目录包含一个使用 `.tf` 扩展名的文件
@@ -1067,13 +1239,13 @@ symbol = "🏎💨 "
 
 ### 配置项
 
-| 字段                | 默认值           | 描述                                                                                        |
-| ----------------- | ------------- | ----------------------------------------------------------------------------------------- |
-| `use_12hr`        | `false`       | 启用 12 小时格式                                                                                |
-| `format`          | 见下文解释         | 用来格式化时间显示的 [chrono 格式字符串](https://docs.rs/chrono/0.4.7/chrono/format/strftime/index.html) |
-| `style`           | `bold yellow` | 显示时间的样式。                                                                                  |
-| `utc_time_offset` | `local`       | 设置所用 UTC 偏移量。 范围是 -24 < x < 24。 允许使用浮点数来得到 30/45 分钟的时区偏移。                                 |
-| `disabled`        | `true`        | 禁用 `time` 组件。                                                                             |
+| 字段                | 默认值             | 描述                                                                                        |
+| ----------------- | --------------- | ----------------------------------------------------------------------------------------- |
+| `use_12hr`        | `false`         | 启用 12 小时格式                                                                                |
+| `format`          | 见下文解释           | 用来格式化时间显示的 [chrono 格式字符串](https://docs.rs/chrono/0.4.7/chrono/format/strftime/index.html) |
+| `style`           | `"bold yellow"` | 显示时间的样式。                                                                                  |
+| `utc_time_offset` | `"local"`       | 设置所用 UTC 偏移量。 范围是 -24 < x < 24。 允许使用浮点数来得到 30/45 分钟的时区偏移。                                 |
+| `disabled`        | `true`          | 禁用 `time` 组件。                                                                             |
 
 如果 `use_12hr` 为 `true`，则`format` 默认值为 `"%r"`。 否则，其默认值为 `"%T"`。 手动设置 `format` 将使 `use_12hr` 被忽略。
 
@@ -1085,12 +1257,12 @@ symbol = "🏎💨 "
 [time]
 disabled = false
 format = "🕙[ %T ]"
-utc_time_offset = -5
+utc_time_offset = "-5"
 ```
 
 ## Username
 
-`username` 组件显示当前活跃的用户名。 此组件只有满足以下条件之一时才会被显示：
+`username` 组件显示当前活跃的用户名。 此组件将在符合以下任意条件之一时显示：
 
 - 当前用户是 root
 - 当前用户与登录用户不相同
@@ -1113,4 +1285,103 @@ utc_time_offset = -5
 
 [username]
 disabled = true
+```
+
+
+## Zig
+
+The `zig` module shows the currently installed version of Zig. 此组件将在符合以下任意条件之一时显示：
+
+- The current directory contains a `.zig` file
+
+### 配置项
+
+| 字段         | 默认值             | 描述                                                    |
+| ---------- | --------------- | ----------------------------------------------------- |
+| `symbol`   | `"↯ "`          | The symbol used before displaying the version of Zig. |
+| `style`    | `"bold yellow"` | 此组件的样式。                                               |
+| `disabled` | `false`         | Disables the `zig` module.                            |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[zig]
+symbol = "⚡️ "
+```
+
+## Custom commands
+
+The `custom` modules show the output of some arbitrary commands.
+
+These modules will be shown if any of the following conditions are met:
+- The current directory contains a file whose name is in `files`
+- The current directory contains a directory whose name is in `directories`
+- The current directory contains a file whose extension is in `extensions`
+- The `when` command returns 0
+
+::: tip
+
+Multiple custom modules can be defined by using a `.`.
+
+:::
+
+::: tip
+
+The order in which custom modules are shown can be individually set by setting `custom.foo` in `prompt_order`. By default, the `custom` module will simply show all custom modules in the order they were defined.
+
+:::
+
+### 配置项
+
+| 字段            | 默认值                       | 描述                                                                                                                         |
+| ------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `command`     |                           | The command whose output should be printed.                                                                                |
+| `when`        |                           | A shell command used as a condition to show the module. The module will be shown if the command returns a `0` status code. |
+| `shell`       |                           | The path to the shell to use to execute the command. If unset, it will fallback to STARSHIP_SHELL and then to "sh".        |
+| `描述`          | `"<custom module>"` | The description of the module that is shown when running `starship explain`.                                               |
+| `files`       | `[]`                      | The files that will be searched in the working directory for a match.                                                      |
+| `directories` | `[]`                      | The directories that will be searched in the working directory for a match.                                                |
+| `extensions`  | `[]`                      | The extensions that will be searched in the working directory for a match.                                                 |
+| `symbol`      | `""`                      | The symbol used before displaying the command output.                                                                      |
+| `style`       | `"bold green"`            | 此组件的样式。                                                                                                                    |
+| `prefix`      | `""`                      | Prefix to display immediately before the command output.                                                                   |
+| `suffix`      | `""`                      | Suffix to display immediately after the command output.                                                                    |
+| `disabled`    | `false`                   | Disables this `custom` module.                                                                                             |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[custom.foo]
+command = "echo foo"  # shows output of command
+files = ["foo"]       # can specify filters
+when = """ test "$HOME" == "$PWD" """
+prefix = " transcending "
+```
+
+## PureScript
+
+The `purescript` module shows the currently installed version of PureScript version. 此组件只有满足以下条件之一时才会被显示：
+
+- The current directory contains a `spago.dhall` file
+- The current directory contains a \*.purs files
+
+### 配置项
+
+| 字段         | 默认值            | 描述                                                           |
+| ---------- | -------------- | ------------------------------------------------------------ |
+| `symbol`   | `"<=> "` | The symbol used before displaying the version of PureScript. |
+| `style`    | `"bold white"` | 此组件的样式。                                                      |
+| `disabled` | `false`        | Disables the `purescript` module.                            |
+
+### 示例
+
+```toml
+# ~/.config/starship.toml
+
+[purescript]
+symbol = "<=> "
 ```

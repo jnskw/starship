@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::{self, Write};
 
 use ansi_term::Color;
-use tempfile;
 
 use crate::common::{self, TestCommand};
 
@@ -68,6 +67,18 @@ fn profile_set() -> io::Result<()> {
 }
 
 #[test]
+fn profile_set_from_aws_vault() -> io::Result<()> {
+    let output = common::render_module("aws")
+        .env("AWS_VAULT", "astronauts-vault")
+        .env("AWS_PROFILE", "astronauts-profile")
+        .output()?;
+    let expected = format!("on {} ", Color::Yellow.bold().paint("☁️  astronauts-vault"));
+    let actual = String::from_utf8(output.stdout).unwrap();
+    assert_eq!(expected, actual);
+    Ok(())
+}
+
+#[test]
 fn profile_and_region_set() -> io::Result<()> {
     let output = common::render_module("aws")
         .env("AWS_PROFILE", "astronauts")
@@ -104,7 +115,7 @@ region = us-east-2
     let expected = format!("on {} ", Color::Yellow.bold().paint("☁️  us-east-1"));
     let actual = String::from_utf8(output.stdout).unwrap();
     assert_eq!(expected, actual);
-    Ok(())
+    dir.close()
 }
 
 #[test]
@@ -136,7 +147,7 @@ region = us-east-2
     );
     let actual = String::from_utf8(output.stdout).unwrap();
     assert_eq!(expected, actual);
-    Ok(())
+    dir.close()
 }
 
 #[test]

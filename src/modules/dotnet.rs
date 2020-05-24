@@ -1,7 +1,7 @@
 use std::ffi::OsStr;
 use std::iter::Iterator;
 use std::ops::Deref;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::str;
 
 use super::{Context, Module, RootModuleConfig};
@@ -19,10 +19,19 @@ const PROJECT_JSON_FILE: &str = "project.json";
 /// the current directory:
 /// global.json, project.json, *.sln, *.csproj, *.fsproj, *.xproj
 pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
-    let dotnet_files = get_local_dotnet_files(context).ok()?;
-    if dotnet_files.is_empty() {
+    // First check if this is a DotNet Project before doing the O(n)
+    // check for the version using the JSON files
+    let is_dotnet_project = context
+        .try_begin_scan()?
+        .set_files(&[GLOBAL_JSON_FILE, PROJECT_JSON_FILE])
+        .set_extensions(&["sln", "csproj", "fsproj", "xproj"])
+        .is_match();
+
+    if !is_dotnet_project {
         return None;
     }
+
+    let dotnet_files = get_local_dotnet_files(context).ok()?;
 
     let mut module = context.new_module("dotnet");
     let config = DotnetConfig::try_load(module.config);
@@ -31,10 +40,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     // Typically it is twice as fast as running `dotnet --version`.
     let enable_heuristic = config.heuristic;
     let version = if enable_heuristic {
-        let repo_root = context
-            .get_repo()
-            .ok()
-            .and_then(|r| r.root.as_ref().map(PathBuf::as_path));
+        let repo_root = context.get_repo().ok().and_then(|r| r.root.as_deref());
         estimate_dotnet_version(&dotnet_files, &context.current_dir, repo_root)?
     } else {
         get_version_from_cli()?

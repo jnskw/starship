@@ -7,11 +7,11 @@ use crate::utils;
 ///
 /// Will display the PHP version if any of the following criteria are met:
 ///     - Current directory contains a `.php` file
-///     - Current directory contains a `composer.json` file
+///     - Current directory contains a `composer.json` or `.php-version` file
 pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     let is_php_project = context
         .try_begin_scan()?
-        .set_files(&["composer.json"])
+        .set_files(&["composer.json", ".php-version"])
         .set_extensions(&["php"])
         .is_match();
 
@@ -58,7 +58,6 @@ mod tests {
     use ansi_term::Color;
     use std::fs::File;
     use std::io;
-    use tempfile;
 
     #[test]
     fn test_format_php_version() {
@@ -70,11 +69,11 @@ mod tests {
     fn folder_without_php_files() -> io::Result<()> {
         let dir = tempfile::tempdir()?;
 
-        let actual = render_module("php", dir.path());
+        let actual = render_module("php", dir.path(), None);
 
         let expected = None;
         assert_eq!(expected, actual);
-        Ok(())
+        dir.close()
     }
 
     #[test]
@@ -82,14 +81,29 @@ mod tests {
         let dir = tempfile::tempdir()?;
         File::create(dir.path().join("composer.json"))?.sync_all()?;
 
-        let actual = render_module("php", dir.path());
+        let actual = render_module("php", dir.path(), None);
 
         let expected = Some(format!(
             "via {} ",
             Color::Fixed(147).bold().paint("🐘 v7.3.8")
         ));
         assert_eq!(expected, actual);
-        Ok(())
+        dir.close()
+    }
+
+    #[test]
+    fn folder_with_php_version() -> io::Result<()> {
+        let dir = tempfile::tempdir()?;
+        File::create(dir.path().join(".php-version"))?.sync_all()?;
+
+        let actual = render_module("php", dir.path(), None);
+
+        let expected = Some(format!(
+            "via {} ",
+            Color::Fixed(147).bold().paint("🐘 v7.3.8")
+        ));
+        assert_eq!(expected, actual);
+        dir.close()
     }
 
     #[test]
@@ -97,13 +111,13 @@ mod tests {
         let dir = tempfile::tempdir()?;
         File::create(dir.path().join("any.php"))?.sync_all()?;
 
-        let actual = render_module("php", dir.path());
+        let actual = render_module("php", dir.path(), None);
 
         let expected = Some(format!(
             "via {} ",
             Color::Fixed(147).bold().paint("🐘 v7.3.8")
         ));
         assert_eq!(expected, actual);
-        Ok(())
+        dir.close()
     }
 }

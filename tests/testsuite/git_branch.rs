@@ -1,8 +1,24 @@
 use ansi_term::Color;
+use remove_dir_all::remove_dir_all;
 use std::io;
 use std::process::Command;
 
 use crate::common::{self, TestCommand};
+
+#[test]
+fn show_nothing_on_empty_dir() -> io::Result<()> {
+    let repo_dir = tempfile::tempdir()?;
+
+    let output = common::render_module("git_branch")
+        .arg("--path")
+        .arg(repo_dir.path())
+        .output()?;
+    let actual = String::from_utf8(output.stdout).unwrap();
+
+    let expected = "";
+    assert_eq!(expected, actual);
+    repo_dir.close()
+}
 
 #[test]
 fn test_changed_truncation_symbol() -> io::Result<()> {
@@ -82,6 +98,30 @@ fn test_japanese_truncation() -> io::Result<()> {
     test_truncate_length("がんばってね", 4, "がんばっ", "…")
 }
 
+#[test]
+fn test_works_with_unborn_master() -> io::Result<()> {
+    let repo_dir = tempfile::tempdir()?.into_path();
+
+    Command::new("git")
+        .args(&["init"])
+        .current_dir(&repo_dir)
+        .output()?;
+
+    let output = common::render_module("git_branch")
+        .arg("--path")
+        .arg(&repo_dir)
+        .output()
+        .unwrap();
+    let actual = String::from_utf8(output.stdout).unwrap();
+
+    let expected = format!(
+        "on {} ",
+        Color::Purple.bold().paint(format!("\u{e0a0} {}", "master")),
+    );
+    assert_eq!(expected, actual);
+    remove_dir_all(repo_dir)
+}
+
 fn test_truncate_length(
     branch_name: &str,
     truncate_length: i64,
@@ -124,7 +164,7 @@ fn test_truncate_length_with_config(
             .unwrap(),
         )
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
 
@@ -135,5 +175,5 @@ fn test_truncate_length_with_config(
             .paint(format!("\u{e0a0} {}{}", expected_name, truncation_symbol)),
     );
     assert_eq!(expected, actual);
-    Ok(())
+    remove_dir_all(repo_dir)
 }

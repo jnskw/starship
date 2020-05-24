@@ -1,16 +1,16 @@
-# Presets
+# Paramètres par défaut
 
-Here is a collection of community-submitted configuration presets for Starship. If you have a preset to share, please [submit a PR](https://github.com/starship/starship/edit/master/docs/presets/README.md) updating this file! 😊
+Voici un ensemble de configuration par défaut soumis par la communauté pour Starship. Si vous avez une configuration à partager, veuillez [proposer une PR](https://github.com/starship/starship/edit/master/docs/presets/README.md) pour mettre à jour ce fichier! 😊
 
 ## Nerd Font Symbols
 
-This preset doesn't change anything except for the symbols used for each module. If emojis aren't your thing, this might catch your eye!
+Cette configuration ne modifie rien sauf les symboles utilisés pour chaque module. Si les émoticônes ne sont pas votre tasse de thé, elle pourrait retenir votre attention!
 
-![Screenshot of Nerd Font Symbols preset](/presets/nerd-font-symbols.png)
+![Capture d'écran du pré-réglage Nerd Font Symbols](/presets/nerd-font-symbols.png)
 
 ### Pré-requis
 
-- A [Nerd Font](https://www.nerdfonts.com/) installed and enabled in your terminal (the example uses Fira Code Nerd Font)
+- Une [Nerd Font](https://www.nerdfonts.com/) est installée et activée dans votre terminal (l'exemple utilise Fira Code Nerd Font)
 
 ### Configuration
 
@@ -26,11 +26,23 @@ discharging_symbol = ""
 [conda]
 symbol = " "
 
+[docker]
+symbol = " "
+
+[elixir]
+symbol = " "
+
+[elm]
+symbol = " "
+
 [git_branch]
 symbol = " "
 
 [golang]
 symbol = " "
+
+[haskell]
+symbol = " "
 
 [hg_branch]
 symbol = " "
@@ -38,8 +50,14 @@ symbol = " "
 [java]
 symbol = " "
 
+[julia]
+symbol = " "
+
 [memory_usage]
 symbol = " "
+
+[nix_shell]
+symbol = " "
 
 [nodejs]
 symbol = " "

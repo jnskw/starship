@@ -1,4 +1,5 @@
 use ansi_term::{ANSIStrings, Color};
+use remove_dir_all::remove_dir_all;
 use std::fs::{self, File};
 use std::io;
 use std::path::PathBuf;
@@ -19,6 +20,21 @@ fn barrier() {
 }
 
 #[test]
+fn show_nothing_on_empty_dir() -> io::Result<()> {
+    let repo_dir = tempfile::tempdir()?;
+
+    let output = common::render_module("git_status")
+        .arg("--path")
+        .arg(repo_dir.path())
+        .output()?;
+    let actual = String::from_utf8(output.stdout).unwrap();
+
+    let expected = "";
+    assert_eq!(expected, actual);
+    repo_dir.close()
+}
+
+#[test]
 #[ignore]
 fn shows_behind() -> io::Result<()> {
     let repo_dir = common::create_fixture_repo()?;
@@ -27,14 +43,14 @@ fn shows_behind() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "⇣")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -50,14 +66,14 @@ fn shows_behind_with_count() -> io::Result<()> {
             show_sync_count = true
         })
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "⇣1")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -70,14 +86,14 @@ fn shows_ahead() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "⇡")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -94,14 +110,14 @@ fn shows_ahead_with_count() -> io::Result<()> {
             show_sync_count = true
         })
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "⇡1")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -113,14 +129,14 @@ fn shows_diverged() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "⇕")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -136,7 +152,7 @@ fn shows_diverged_with_count() -> io::Result<()> {
             show_sync_count = true
         })
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red
@@ -146,7 +162,7 @@ fn shows_diverged_with_count() -> io::Result<()> {
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -158,14 +174,14 @@ fn shows_conflicted() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "=")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -181,14 +197,14 @@ fn shows_conflicted_with_count() -> io::Result<()> {
             conflicted_count.enabled = true
         })
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "=1")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -200,14 +216,14 @@ fn shows_untracked_file() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "?")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -223,14 +239,14 @@ fn shows_untracked_file_with_count() -> io::Result<()> {
             untracked_count.enabled = true
         })
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "?1")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -248,14 +264,14 @@ fn doesnt_show_untracked_file_if_disabled() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = "";
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -274,14 +290,14 @@ fn shows_stashed() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "$")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -304,14 +320,13 @@ fn shows_stashed_with_count() -> io::Result<()> {
             stashed_count.enabled = true
         })
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "$1")).to_string();
 
     assert_eq!(expected, actual);
-
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -323,14 +338,13 @@ fn shows_modified() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "!")).to_string();
 
     assert_eq!(expected, actual);
-
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -346,14 +360,14 @@ fn shows_modified_with_count() -> io::Result<()> {
             modified_count.enabled = true
         })
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "!1")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -365,14 +379,14 @@ fn shows_staged_file() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "+")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -389,7 +403,7 @@ fn shows_staged_file_with_count() -> io::Result<()> {
             staged_count.style = "green"
         })
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = format!(
@@ -403,7 +417,7 @@ fn shows_staged_file_with_count() -> io::Result<()> {
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -415,14 +429,14 @@ fn shows_renamed_file() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "»")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -438,14 +452,14 @@ fn shows_renamed_file_with_count() -> io::Result<()> {
             renamed_count.enabled = true
         })
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "»1")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -457,14 +471,14 @@ fn shows_deleted_file() -> io::Result<()> {
 
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "✘")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -480,14 +494,14 @@ fn shows_deleted_file_with_count() -> io::Result<()> {
             deleted_count.enabled = true
         })
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .output()?;
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = Color::Red.bold().paint(format!("[{}] ", "✘1")).to_string();
 
     assert_eq!(expected, actual);
 
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -497,7 +511,7 @@ fn prefix() -> io::Result<()> {
     File::create(repo_dir.join("prefix"))?.sync_all()?;
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .env_clear()
         .use_config(toml::toml! {
             [git_status]
@@ -508,7 +522,7 @@ fn prefix() -> io::Result<()> {
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = "(";
     assert!(actual.starts_with(&expected));
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 #[test]
@@ -518,7 +532,7 @@ fn suffix() -> io::Result<()> {
     File::create(repo_dir.join("suffix"))?.sync_all()?;
     let output = common::render_module("git_status")
         .arg("--path")
-        .arg(repo_dir)
+        .arg(&repo_dir)
         .env_clear()
         .use_config(toml::toml! {
             [git_status]
@@ -529,7 +543,7 @@ fn suffix() -> io::Result<()> {
     let actual = String::from_utf8(output.stdout).unwrap();
     let expected = ")";
     assert!(actual.ends_with(&expected));
-    Ok(())
+    remove_dir_all(repo_dir)
 }
 
 fn ahead(repo_dir: &PathBuf) -> io::Result<()> {
